@@ -32,6 +32,48 @@ const fn_filters = {
     }
 }
 
+const fn_storage = {
+    fnExistInStorage(id) {
+        if (global_vars.user_libray.length > 0) {
+            let exist = global_vars.user_libray.includes(`${id}`)
+            return exist
+        }
+    },
+    fnHandleCurrentGames() {
+        global_vars.array_inputs = document.querySelectorAll('.content .extra-info input[type="checkbox"]')
+
+        if (global_vars.array_inputs.length > 0) {
+            global_vars.array_inputs.forEach((item) => item.addEventListener('input', this.fnConfirmation))
+        }
+    },
+
+    fnConfirmation() {
+        let existsID = fn_storage.fnExistsInStorage(this.id)
+
+        if (!existsID) {
+            let confirmation = confirm("Would you like to add this game to your Favorites Games?")
+            if (confirmation) {
+                global_vars.user_libray.push(this.id)
+                fn_storage.fnUpdateLocalStorage()
+            } else {
+                this.checked = false;
+            }
+        } else {
+            let confirmation = confirm("Would you like to remove this game from your Favorites Games?")
+            if (confirmation) {
+                global_vars.user_libray = global_vars.user_libray.filter(libID => libID != this.id)
+                fn_storage.fnUpdateLocalStorage()
+            } else {
+                this.checked = true;
+            }
+        }
+    },
+
+    fnUpdateLocalStorage() {
+        localStorage.setItem("my-favs-games", JSON.stringify(global_vars.user_libray))
+    }
+}
+
 const DOM_HTML = { // criar os cards de cada um dos jogos
     render_div(id, className) {
         const div = document.createElement("div")
@@ -82,6 +124,13 @@ const DOM_HTML = { // criar os cards de cada um dos jogos
         return label
     },
 
+    render_span(genre, className) {
+        const span = document.createElement("span")
+        span.classList.add(className)
+        span.innerText = genre
+        return span
+    },
+
     render_button(id, className, text) {
         const button = document.createElement('button')
         button.setAttribute('id', id)
@@ -123,15 +172,44 @@ const DOM_HTML = { // criar os cards de cada um dos jogos
         const label = this.render_label('favorite')
         const checkmark = this.render_div(null, "checkmark_favorite")
         const input = this.render_input(id)
-        const span = this.rende_span(genre, 'game-genre')
+        const span = this.render_span(genre, 'game-genre')
 
         let existsID = fn_storage.fnExistInStorage(id)
         if (existsID) input.checked = true;
 
         div.appendChild(label, span)
         label.append(input, checkmark)
-        
-        //continuar daqui
+
+        if (platform.toLowerCase().includes('pc')) {
+            const icon = this.render_img('./assets/content/pc.png', 'pc', null, null)
+            div.appendChild(icon)
+        } else if (platform.toLowerCase().includes('web')) {
+            const icon = this.render_img('./assets/content/browser.png', 'browser', null, null)
+            div.appendChild(icon)
+        }
+        return div
+    },
+
+    render_items() {
+        let games = global_vars.fetch_results.splice(0, 9)
+        games.forEach((game_item) => DOM_HTML.render_game_item(game_item))
+        fn_storage.fnHandleCurrentGames()
+        DOM_HTML.render_button_show_more()
+        if (global_vars.fetch_results.length === 0) {
+            document.querySelector('.content .container buton').remove()
+        }
+    },
+    render_button_show_more() {
+        const button = this.render_button('btn-more-items', 'btn-more-items', 'Carregar mais...')
+        button.addEventListener('click', this.render_items)
+        if (!document.querySelector('.content .container button')) {
+            document.querySelector('.content .container').appendChild(button)
+        }
+    },
+    remove_childrens(parents) {
+        while (parents.firstChild) {
+            parent.removeChild(parent.firstChild);
+        }
     }
 }
 //Fetch que fetch que faz os jogos aparecerem
@@ -208,3 +286,7 @@ const request_api = {
         }
     }
 }
+global_vars.fltr_header.forEach((input) => input.addEventListener('input', fn_filters.fnHandHeadlerFilter))
+global_vars.fltr_sidenav.forEach((input) => input.addEventListener('input', fn_filters.fnHandleSideNavFilters))
+
+request_api.fetch_initial().catch((error) => console.error(error))
