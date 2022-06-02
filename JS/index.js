@@ -7,6 +7,7 @@ const global_vars = {
     user_libray: JSON.parse(localStorage.getItem("my-favs-games")) ? JSON.parse(localStorage.getItem("my-favs-games")) : [],
     fetch_results: null,
     array_inputs: null,
+    tituloGame: document.querySelector('h3')
 }
 
 const filtersForFetch = {
@@ -16,7 +17,8 @@ const filtersForFetch = {
 
 const fn_filters = {
     fnHandHeadlerFilter() {
-        if (this.id != "all-game") filtersForFetch.platform = this.id;
+        console.log(this.target)
+        if (this.id != "all-games") filtersForFetch.platform = this.id;
         else filtersForFetch.platform = ''
 
         request_api.fetch_filtered().catch((error) => console.log(error))
@@ -48,7 +50,7 @@ const fn_storage = {
     },
 
     fnConfirmation() {
-        let existsID = fn_storage.fnExistsInStorage(this.id)
+        let existsID = fn_storage.fnExistInStorage(this.id)
 
         if (!existsID) {
             let confirmation = confirm("Would you like to add this game to your Favorites Games?")
@@ -77,7 +79,7 @@ const fn_storage = {
 const DOM_HTML = { // criar os cards de cada um dos jogos
     render_div(id, className) {
         const div = document.createElement("div")
-        if (div) div.setAttribute('id', id)
+        if (id) div.setAttribute('id', id)
         div.classList.add(className)
         return div;
     },
@@ -177,7 +179,7 @@ const DOM_HTML = { // criar os cards de cada um dos jogos
         let existsID = fn_storage.fnExistInStorage(id)
         if (existsID) input.checked = true;
 
-        div.appendChild(label, span)
+        div.append(label, span)
         label.append(input, checkmark)
 
         if (platform.toLowerCase().includes('pc')) {
@@ -196,7 +198,7 @@ const DOM_HTML = { // criar os cards de cada um dos jogos
         fn_storage.fnHandleCurrentGames()
         DOM_HTML.render_button_show_more()
         if (global_vars.fetch_results.length === 0) {
-            document.querySelector('.content .container buton').remove()
+            document.querySelector('.content .container button').remove()
         }
     },
     render_button_show_more() {
@@ -206,8 +208,8 @@ const DOM_HTML = { // criar os cards de cada um dos jogos
             document.querySelector('.content .container').appendChild(button)
         }
     },
-    remove_childrens(parents) {
-        while (parents.firstChild) {
+    remove_childrens(parent) {
+        while (parent.firstChild) {
             parent.removeChild(parent.firstChild);
         }
     }
@@ -250,6 +252,8 @@ const request_api = {
     },
 
     async fetch_initial() {
+        DOM_HTML.remove_childrens(global_vars.game_banner)
+        DOM_HTML.remove_childrens(global_vars.grid_all_games)
         global_vars.fetch_results = []
 
         let url = 'https://free-to-play-games-database.p.rapidapi.com/api/games?sort-by=popularity'
@@ -263,14 +267,15 @@ const request_api = {
         }
     },
     async fetch_filtered() {
+        DOM_HTML.remove_childrens(global_vars.game_banner)
+        DOM_HTML.remove_childrens(global_vars.grid_all_games)
+
         global_vars.fetch_results = []
 
         if (document.querySelector('.content .container button')) {
             document.querySelector('.content .container button').remove()
         }
 
-        DOM_HTML.remove_childrens(global_vars.game_banner)
-        DOM_HTML.remove_childrens(global_vars.grid_all_games)
 
         const url = this.fn_validate_url()
 
@@ -279,12 +284,18 @@ const request_api = {
         if (data_api.length > 0) {
             DOM_HTML.render_banner(data_api.shift())
             global_vars.fetch_results = data_api
-            DOM_HTML.render_items();
-            fn_storage.fnHandleCurrentGames()
+
+            if (global_vars.fetch_results.length > 0) {
+                DOM_HTML.render_items();
+                fn_storage.fnHandleCurrentGames()
+            }
+            global_vars.tituloGame.textContent = "Games"
         } else {
-            alert("Not found")
+            global_vars.tituloGame.textContent = "Sorry, não encontramos o seu jogo!"
+            // alert("Not found")
         }
     }
+
 }
 global_vars.fltr_header.forEach((input) => input.addEventListener('input', fn_filters.fnHandHeadlerFilter))
 global_vars.fltr_sidenav.forEach((input) => input.addEventListener('input', fn_filters.fnHandleSideNavFilters))

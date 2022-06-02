@@ -1,0 +1,73 @@
+.label input[type="checkbox"], .favorite input[type="checkbox"], .label input[type="radio"] {
+    cursor: pointer;
+    position: absolute;
+    opacity: 0;
+    height: 0;
+    width: 0;
+}
+
+.label, .favorite {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.checkmark_header {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    padding: 8px;
+    border-radius: 4px;
+    line-height: 0;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.checkmark {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 130px;
+    padding: 10px;
+    border-radius: 4px;
+    line-height: 0;
+    background-color: #fff;
+}
+
+.checkmark_favorite {
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    background: url('../assets/content/add.png') no-repeat;
+}
+
+.transition {
+    -webkit-transition: 0.15s;
+    transition: 0.15s;
+}
+
+.label:hover > .checkmark_header img, .label:hover > .checkmark img {
+    transition: 0.5s ease-in-out;
+    transform: rotate3d(0, 1, 0, 360deg);
+}
+
+.label input:checked ~ .checkmark {
+    background: rgba(176, 125, 251, 0.5);
+    color: #fff;
+}
+
+.label input:checked ~ .checkmark_header, .checkmark_header:hover {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.favorite:hover{
+    transition: all .2s ease-in-out;
+    transform: scale(1.2);
+}
+
+.favorite input:checked ~ .checkmark_favorite {
+    background: url('../assets/content/remove.png') no-repeat;
+}
