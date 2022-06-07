@@ -242,3 +242,30 @@ a {
     color: #FFFFFF;
     gap: 10px;
 }
+
+@media (max-width: 1100px) {
+    .content .game-banner figure img {
+        width: 545px;
+    }
+
+    .content .grid-all-games {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 800px) {
+    .header nav ul li + li {
+        margin-left: 0.5rem;
+    }
+    .content .game-banner figure img {
+        width: var(--default-game-img-width);
+        height: var(--default-game-img-heigth);
+    }
+    .content .grid-all-games {
+        grid-template-columns: 1fr;
+    }
+    .content .grid-all-games .game-item figure img {
+        width: var(--default-game-img-width);
+        height: var(--default-game-img-heigth);
+    }
+}
